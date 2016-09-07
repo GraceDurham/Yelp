@@ -10,6 +10,7 @@ Choice1=raw_input("Please enter a city")
 # here are the results with out door seating for restaurants in sf or city, and state they choose
 
 # idea maybe create class contact with self, first_name, last_name, email="", mobile_phone="", text_message, 
+send text message to friends to hang out at resteraunt 
 
 
 
