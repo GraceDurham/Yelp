@@ -7,37 +7,28 @@
 # use yelp api for resteraunts with out door seating 
 # use conditional if 60-80 suggest resteraunts with out door seating 
 # else less than 60 suggest resetaunts with indoor seating 
-# here are the results with out door seating for restaurants in sf or city, and state they choose
-
-# # idea maybe create class contact with self, first_name, last_name, email="", mobile_phone="", text_message, 
-# send text message to friends to hang out at resteraunt 
-
-
-
-
-
+# here are the results with out door seating for restaurants in sf or city, and state they choose 
 
 from urllib2 import urlopen 
 from json import load 
 from config_secret import*
-
-# use two apis one from weather underground and one from yelp 
-
-# def get_temperature_from_weather_underground(user_state,user_city):
-
-# 	url_base = 'http://api.wunderground.com/api/' + weather_underground_key
-# 	apiUrl = url_base+"/conditions/q/"+user_state+"/"+user_city+".json"
-
-# 	response=urlopen(apiUrl)
-
-# 	json_obj=load(response)
-
-# 	temperature=json_obj["current_observation"]["feelslike_f"]
-# 	return float(temperature)
-# pip install yelp 
-
+from urllib import pathname2url 
 from yelp.client import Client
 from yelp.oauth1_authenticator import Oauth1Authenticator
+# use two apis one from weather underground and one from yelp 
+
+def get_temperature_from_weather_underground(user_state, user_city):
+    url_base = 'http://api.wunderground.com/api/' + weather_underground_key
+    apiUrl = url_base+"/conditions/q/"+pathname2url(user_state)+"/"+pathname2url(user_city)+".json"
+
+    response=urlopen(apiUrl)
+
+    json_obj=load(response)
+    
+    if json_obj.get("current_observation"):
+        return json_obj["current_observation"]["feelslike_f"]
+     
+    return 0   
 
 auth = Oauth1Authenticator(
     consumer_key=YOUR_CONSUMER_KEY,
@@ -50,47 +41,45 @@ client = Client(auth)
 
 
 params = {
-    'term': 'outdoor seating',
     'lang': 'en'
 }
 
 
 #search for and print businesses
-def fetch_and_print_resturants(place):
+def fetch_and_print_resturants(state, city, search_term):
     #go to yelp api and fetch business
-    response= client.search(place, **params)
+
+    params['term'] = search_term;
+    response= client.search(state + " " + city, **params)
     busisness_objs_list = response.businesses
 
     #print the name of all the businesses that came back from yelp
     for place in busisness_objs_list:
 	   print place.name
 
-# location=json_obj["location"]["city"]
-# print location 
-# apiUrl= yelp api use key in my gmail 
-
-# response=urlopen 
-
-# json_obj=load(response)
-# print json_obj 
- 
-
-
-
 def main():
-    
-
     while True:
     #ask the user to enter in the city and state or quit and save it to place
-        place = raw_input("Please enter city and state abbreviation (e.g. San Francisco CA) or Q to quit:\n");
-        if place=="q":
+        state = raw_input("Please enter state abbreviation (e.g.CA) or Q to quit:\n")
+        if state=="q":
             break 
-        else:    
-            fetch_and_print_resturants(place)
+        else:
+            city = raw_input("Please enter city (e.g.San Francisco)\n")
+            temp = get_temperature_from_weather_underground(state, city)
+            float_temp = float(temp)
+
+            if(float_temp > 65):
+                print "It feels like" + temp + " outside. What a great day to go to an outdoor resturant. Pick one below."
+                search_term = 'outdoor seating'
+            elif(float_temp < 40):
+                print "It feels like" + temp + " outside. Better grub somewhere warm with soup. Pick one below."
+                search_term = 'soup'
+            else:
+                print "It feels like" + temp + " outside. How about eating somewhere inside. Pick one below."
+                search_term = 'indoor seating'    
+
             
-
-    # fetch_and_print_resturants()
-
+            fetch_and_print_resturants(state, city, search_term)
 
 if __name__ == '__main__':
  	main()
