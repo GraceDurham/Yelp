@@ -1,0 +1,10 @@
+<!doctype.html>
+<title> First Template </title>
+<link rel=stylesheet type=text/css href="{{url_for('static', filename= 'style.css')}}" />
+<div class=page>
+{% if username %}
+	<h1> Hello {{username}} </h1>
+{% else %}
+	<h1> Username not defined! </h1>
+{% endif %}	
+</div>	
